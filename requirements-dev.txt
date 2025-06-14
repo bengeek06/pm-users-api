@@ -7,7 +7,9 @@ Flask-Migrate
 flask-restful
 Flask-SQLAlchemy
 marshmallow-sqlalchemy
+requests
 pytest
 pytest-cov
 pylint
 pycodestyle
+requests_mock

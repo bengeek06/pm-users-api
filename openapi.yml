@@ -1,20 +1,211 @@
 openapi: 3.0.3
 info:
-  title: Dummy API
-  version: '1.0'
-  description: API for managing dummy items.
+  title: PM Users API
+  version: "1.0.0"
+  description: API for managing users, configuration, and import/export operations.
 
 servers:
-  - url: http://localhost:5000/
+  - url: /  # Adapter selon le déploiement
 
 paths:
+  /users:
+    get:
+      tags:
+        - Users
+      description: Retrieve a list of users
+      operationId: listUsers
+      summary: List all users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - Users
+      description: Create a new user
+      operationId: createUser
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+
+  /users/{user_id}:
+    get:
+      tags:
+        - Users
+      description: Retrieve a user by ID
+      operationId: getUserById
+      summary: Get a user by ID
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+    put:
+      tags:
+        - Users
+      description: Replace a user by ID
+      operationId: replaceUser
+      summary: Replace a user
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+        '404':
+          description: User not found
+    patch:
+      tags:
+        - Users
+      description: Partially update a user by ID
+      operationId: updateUser
+      summary: Partially update a user
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+        '404':
+          description: User not found
+    delete:
+      tags:
+        - Users
+      description: Delete a user by ID
+      operationId: deleteUser
+      summary: Delete a user
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          description: User not found
+
+  /users/verify_password:
+    post:
+      tags:
+        - Users
+      description: Verify user password
+      operationId: verifyUserPassword
+      summary: Verify user password (internal)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        '200':
+          description: Password valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  user_id:
+                    type: string
+                  company_id:
+                    type: integer
+        '401':
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+
   /version:
     get:
-      tags: ["Meta"]
+      tags:
+        - Meta
+      description: Get API version
+      operationId: getApiVersion
       summary: Get API version
       responses:
         '200':
-          description: Current API version
+          description: API version
           content:
             application/json:
               schema:
@@ -22,14 +213,17 @@ paths:
                 properties:
                   version:
                     type: string
-                    example: "1.0.0"
+
   /config:
     get:
-      tags: ["Meta"]
+      tags:
+        - Meta
+      description: Get application configuration
+      operationId: getAppConfig
       summary: Get application configuration
       responses:
         '200':
-          description: Current application configuration
+          description: Application config
           content:
             application/json:
               schema:
@@ -37,173 +231,23 @@ paths:
                 properties:
                   FLASK_ENV:
                     type: string
-                    example: "development"
                   DEBUG:
                     type: string
-                    example: "True"
                   DATABASE_URI:
                     type: string
-                    example: "sqlite:///:memory:"
-
-  /dummies:
-    get:
-      tags: ["Dummies"]
-      summary: List all dummy items
-      responses:
-        '200':
-          description: List of dummy items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Dummy'
-    post:
-      tags: ["Dummies"]
-      summary: Create a new dummy item
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DummyCreate'
-      responses:
-        '201':
-          description: Dummy item created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dummy'
-        '400':
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-        '500':
-          description: Database error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /dummies/{dummy_id}:
-    parameters:
-      - name: dummy_id
-        in: path
-        required: true
-        schema:
-          type: integer
-    get:
-      tags: ["Dummies"]
-      summary: Get a dummy item by ID
-      responses:
-        '200':
-          description: Dummy item found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dummy'
-        '404':
-          description: Dummy not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    put:
-      tags: ["Dummies"]
-      summary: Replace a dummy item by ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DummyCreate'
-      responses:
-        '200':
-          description: Dummy item updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dummy'
-        '400':
-          description: Validation or integrity error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-        '404':
-          description: Dummy not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Database error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    patch:
-      tags: ["Dummies"]
-      summary: Partially update a dummy item by ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DummyUpdate'
-      responses:
-        '200':
-          description: Dummy item updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dummy'
-        '400':
-          description: Validation or integrity error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-        '404':
-          description: Dummy not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Database error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    delete:
-      tags: ["Dummies"]
-      summary: Delete a dummy item by ID
-      responses:
-        '204':
-          description: Dummy deleted successfully
-        '404':
-          description: Dummy not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Database error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
   /export/csv:
     get:
-      tags: ["Export"]
-      summary: Export all dummy items as CSV
+      tags:
+        - Export
+      description: Export users as CSV
+      operationId: exportUsersCsv
+      produces:
+        - text/csv
+      summary: Export users as CSV
       responses:
         '200':
-          description: CSV file containing all dummy items
+          description: CSV file
           content:
             text/csv:
               schema:
@@ -212,8 +256,11 @@ paths:
 
   /import/csv:
     post:
-      tags: ["Import"]
-      summary: Import dummy items from a CSV file
+      tags:
+        - Import
+      description: Import users from CSV file
+      operationId: importUsersCsv
+      summary: Import users from CSV
       requestBody:
         required: true
         content:
@@ -226,31 +273,17 @@ paths:
                   format: binary
       responses:
         '200':
-          description: Import successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        '207':
-          description: Partial success with errors
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
+          description: Import success
         '400':
-          description: Import failed or validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
+          description: Import error
 
   /import/json:
     post:
-      tags: ['Import']
-      summary: Import dummy items from a JSON file
+      tags:
+        - Import
+      description: Import users from JSON file
+      operationId: importUsersJson
+      summary: Import users from JSON
       requestBody:
         required: true
         content:
@@ -263,77 +296,94 @@ paths:
                   format: binary
       responses:
         '200':
-          description: Import successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        '207':
-          description: Partial success with errors
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
+          description: Import success
         '400':
-          description: Import failed or validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
+          description: Import error
 
 components:
   schemas:
-    Dummy:
+    User:
       type: object
       properties:
         id:
+          type: string
+        email:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        phone_number:
+          type: string
+        avatar_url:
+          type: string
+        is_active:
+          type: boolean
+        is_verified:
+          type: boolean
+        language:
+          type: string
+        company_id:
           type: integer
-          example: 1
-        name:
+        role_id:
+          type: integer
+        last_login_at:
           type: string
-          example: "Test Dummy"
-        description:
+          format: date-time
+        created_at:
           type: string
-          example: "A test dummy"
-    DummyCreate:
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    UserCreate:
       type: object
-      required:
-        - name
+      required: [email, passwd]
       properties:
-        name:
+        email:
           type: string
-          example: "Test Dummy"
-        description:
+        passwd:
           type: string
-          example: "A test dummy"
-    DummyUpdate:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        phone_number:
+          type: string
+        avatar_url:
+          type: string
+        is_active:
+          type: boolean
+        is_verified:
+          type: boolean
+        language:
+          type: string
+        company_id:
+          type: integer
+        role_id:
+          type: integer
+    UserUpdate:
       type: object
       properties:
-        name:
+        email:
           type: string
-          example: "Updated Dummy"
-        description:
+        passwd:
           type: string
-          example: "Updated description"
-    Error:
-      type: object
-      properties:
-        message:
+        firstname:
           type: string
-          example: "Dummy not found"
-        error:
+        lastname:
           type: string
-          example: "Integrity error"
-    ValidationError:
-      type: object
-      properties:
-        message:
+        phone_number:
           type: string
-          example: "Validation error"
-        errors:
-          type: object
-          additionalProperties: true
-          example: {"name": ["Name must be unique."]}
+        avatar_url:
+          type: string
+        is_active:
+          type: boolean
+        is_verified:
+          type: boolean
+        language:
+          type: string
+        company_id:
+          type: integer
+        role_id:
+          type: integer
