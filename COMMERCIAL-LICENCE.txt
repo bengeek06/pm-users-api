@@ -69,5 +69,5 @@ This contract is governed by French law. In case of dispute, the parties agree t
 
 For any commercial or technical request:
 📧 bengeek06@gmail.com
-🌐 https://github.com/bengeek06/pm-auth-api
+🌐 https://github.com/bengeek06/pm-user-api
 
