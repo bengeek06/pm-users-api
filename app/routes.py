@@ -7,7 +7,8 @@ Routes for the Flask application.
 """
 from flask_restful import Api
 from app.logger import logger
-from app.resources.dummy import DummyResource, DummyListResource
+from app.resources.users import UserResource, UserListResource
+from app.resources.verify import UserVerifyPasswordResource
 from app.resources.version import VersionResource
 from app.resources.config import ConfigResource
 from app.resources.export_to import ExportCSVResource
@@ -27,8 +28,9 @@ def register_routes(app):
     """
     api = Api(app)
 
-    api.add_resource(DummyListResource, '/dummies')
-    api.add_resource(DummyResource, '/dummies/<int:dummy_id>')
+    api.add_resource(UserListResource, '/users')
+    api.add_resource(UserResource, '/users/<string:user_id>')
+    api.add_resource(UserVerifyPasswordResource, '/users/verify_password')
     api.add_resource(ExportCSVResource, '/export/csv')
     api.add_resource(ImportCSVResource, '/import/csv')
     api.add_resource(ImportJSONResource, '/import/json')

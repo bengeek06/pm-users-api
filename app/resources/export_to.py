@@ -9,7 +9,7 @@ import io
 import csv
 from flask_restful import Resource
 from flask import make_response
-from app.models import Dummy
+from app.models import User
 
 
 class ExportCSVResource(Resource):
@@ -29,7 +29,7 @@ class ExportCSVResource(Resource):
             Response: A CSV file containing all Dummy records.
         """
         # Retrieve all Dummy records
-        dummies = Dummy.get_all()
+        users = User.get_all()
 
         # Prepare CSV in memory
         output = io.StringIO()
@@ -37,8 +37,20 @@ class ExportCSVResource(Resource):
         # Write header
         writer.writerow(["id", "name", "description"])
         # Write data rows
-        for dummy in dummies:
-            writer.writerow([dummy.id, dummy.name, dummy.description])
+        for user in users:
+            writer.writerow([
+                user.id,
+                user.email,
+                user.firstname,
+                user.lastname,
+                user.phone_number,
+                user.avatar_url,
+                user.is_active,
+                user.is_verified,
+                user.language,
+                user.company_id,
+                user.role_id
+                ])
 
         # Create response
         response = make_response(output.getvalue())

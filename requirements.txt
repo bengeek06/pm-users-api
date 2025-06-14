@@ -7,3 +7,4 @@ Flask-Migrate
 flask-restful
 Flask-SQLAlchemy
 marshmallow-sqlalchemy
+requests
