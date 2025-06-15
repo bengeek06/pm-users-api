@@ -8,3 +8,4 @@ flask-restful
 Flask-SQLAlchemy
 marshmallow-sqlalchemy
 requests
+psycopg2-binary
